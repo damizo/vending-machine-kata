@@ -2,9 +2,9 @@ package exception;
 
 import exception.ExceptionMessages;
 
-public class ShelveNotExists extends RuntimeException {
+public class ShelveNotExistsException extends RuntimeException {
 
-    public ShelveNotExists(Integer shelveNumber) {
+    public ShelveNotExistsException(Integer shelveNumber) {
             super(String.format(ExceptionMessages.SHELVE_NOT_EXISTS, shelveNumber));
     }
 }

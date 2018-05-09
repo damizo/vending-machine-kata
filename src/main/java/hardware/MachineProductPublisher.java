@@ -4,7 +4,7 @@ import domain.Product;
 import domain.Shelve;
 import exception.EmptyShelveException;
 import exception.ProductNotFoundException;
-import exception.ShelveNotExists;
+import exception.ShelveNotExistsException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,19 +12,22 @@ import java.util.Optional;
 
 public class MachineProductPublisher {
 
-    private Map<Integer, Shelve> shelvesWithProducts = new HashMap() {{
-        put(15, new Shelve(new Product("Snickers", new BigDecimal("1.20")), 5));
-        put(16, new Shelve(new Product("Mars", new BigDecimal("1.20")), 5));
-        put(17, new Shelve(new Product("Oshee", new BigDecimal("3.20")), 5));
-        put(18, new Shelve(new Product("Cola", new BigDecimal("3.00")), 5));
-    }};
+    private Map<Integer, Shelve> shelvesWithProducts;
 
+    public MachineProductPublisher(){
+        shelvesWithProducts = new HashMap() {{
+            put(15, new Shelve(new Product("Snickers", new BigDecimal("1.20")), 5));
+            put(16, new Shelve(new Product("Mars", new BigDecimal("1.20")), 5));
+            put(17, new Shelve(new Product("Oshee", new BigDecimal("3.20")), 5));
+            put(18, new Shelve(new Product("Cola", new BigDecimal("3.00")), 5));
+        }};
+    }
 
     public Shelve getShelve(Integer shelveNumber) {
         return Optional
             .ofNullable(shelvesWithProducts
                 .get(shelveNumber))
-            .orElseThrow(() -> new ShelveNotExists(shelveNumber));
+            .orElseThrow(() -> new ShelveNotExistsException(shelveNumber));
     }
 
     public Optional<Product> getProduct(Integer shelveNumber) {
