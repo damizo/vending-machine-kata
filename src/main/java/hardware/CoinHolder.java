@@ -14,7 +14,6 @@ public class CoinHolder {
 
     private static final Map<CoinType, Coin> coins = new HashMap<>();
 
-
     public CoinType releaseCoin(CoinType coinType) {
         Coin coin = Optional
             .of(coins.get(coinType))
