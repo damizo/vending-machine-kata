@@ -78,6 +78,16 @@ public class VendingMachine implements Observer {
         transactions.add(currentTransaction);
     }
 
+    public List<CoinType> returnChange(ObservableTransaction observableTransaction) {
+        return observableTransaction.getCoinsToReturnChange();
+    }
+
+    public void pressCancelButton() {
+        currentTransaction.setStatus(TransactionStatus.CANCELED);
+        currentTransaction.setRefundedCoins(getBackCoins());
+        transactions.add(currentTransaction);
+    }
+
     public Product releaseProduct(ObservableTransaction observableTransaction) {
         Product product = productPublisher.releaseProduct(observableTransaction.getShelveNumber());
         observableTransaction.endTransaction(TransactionStatus.SUCCESS);
@@ -99,6 +109,29 @@ public class VendingMachine implements Observer {
             }
         }
         return currentBalance;
+    }
+
+    public List<CoinType> refund(ObservableTransaction observableTransaction) {
+        List<CoinType> refundedCoins = observableTransaction.getInsertedCoins()
+            .stream()
+            .map(coin -> coinHolder.releaseCoin(coin))
+            .collect(Collectors.toList());
+        currentTransaction.setRefundedCoins(refundedCoins);
+        return refundedCoins;
+    }
+
+    @Override
+    public void notifyAboutEndOfTransaction(ObservableTransaction observableTransaction) {
+        if (productCanBeReleased(observableTransaction)) {
+            releaseProduct(observableTransaction);
+            returnChange(observableTransaction);
+        } else if (machineHasInsufficientMoney(observableTransaction)) {
+            refund(observableTransaction);
+        }
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
     }
 
     private boolean transactionIsNotInitialized() {
@@ -132,39 +165,6 @@ public class VendingMachine implements Observer {
             balance = addToReturnChangeCoinsAndUpdateBalance(balance, coinToRelease);
         }
         return balance;
-    }
-
-    public void pressCancelButton() {
-        currentTransaction.setStatus(TransactionStatus.CANCELED);
-        currentTransaction.setRefundedCoins(getBackCoins());
-        transactions.add(currentTransaction);
-    }
-
-    @Override
-    public void notifyAboutEndOfTransaction(ObservableTransaction observableTransaction) {
-        if (productCanBeReleased(observableTransaction)) {
-            releaseProduct(observableTransaction);
-            returnChange(observableTransaction);
-        } else if (machineHasInsufficientMoney(observableTransaction)) {
-            refund(observableTransaction);
-        }
-    }
-
-    public List<CoinType> returnChange(ObservableTransaction observableTransaction) {
-        return observableTransaction.getCoinsToReturnChange();
-    }
-
-    public List<Transaction> getTransactions() {
-        return transactions;
-    }
-
-    public List<CoinType> refund(ObservableTransaction observableTransaction) {
-        List<CoinType> refundedCoins = observableTransaction.getInsertedCoins()
-            .stream()
-            .map(coin -> coinHolder.releaseCoin(coin))
-            .collect(Collectors.toList());
-        currentTransaction.setRefundedCoins(refundedCoins);
-        return refundedCoins;
     }
 
     private boolean machineHasInsufficientMoney(ObservableTransaction observableTransaction) {
